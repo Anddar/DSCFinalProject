@@ -1,0 +1,104 @@
+body {
+	background-color: #142954;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #444444;
+}
+
+textarea {
+/* 	resize: both; */
+	width: 118px; 
+	height: 75px; 
+	min-height: 5em; 
+	min-width: 1ch;"
+}
+
+label table {
+	display: inline-block;
+	vertical-align: middle;
+	margin-bottom: 1rem;
+}
+
+input[type='number'] {
+	width: 80px;
+	margin-top: .4em;
+	margin-bottom: .4em;
+	margin-left: .5em;
+	margin-right: .5em;
+}
+
+#amatrix {
+	resize: horizontal;
+	display: block;
+	overflow: hidden;
+}
+
+#bmatrix {
+	resize: horizontal;
+	display: block;
+	overflow: hidden;
+}
+
+#data {
+	resize: horizontal;
+	display: block;
+	overflow: hidden;
+}
+
+.bg-steel {
+  background-color: #5f788a;
+}
+
+.site-header .navbar-nav .nav-link {
+  color: #cbd5db;
+}
+
+.site-header .navbar-nav .nav-link:hover {
+  color: #ffffff;
+}
+
+.site-header .navbar-nav .nav-link.active {
+  font-weight: 500;
+}
+
+.content-section {
+  background: #ffffff;
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+	overflow: auto;
+	resize: auto;
+}
+
+.article-title {
+  color: #444444;
+}
+
+a.article-title:hover {
+  color: #428bca;
+  text-decoration: none;
+}
+
+.article-content {
+  white-space: pre-line;
+}
+
+.article-img {
+  height: 65px;
+  width: 65px;
+  margin-right: 16px;
+}
+
+.article-metadata {
+  padding-bottom: 1px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #e3e3e3
+}
+
+.btn {
+	background-color: #142954;
+	margin-block-start: .5em;
+  margin-block-end: .5em;
+}

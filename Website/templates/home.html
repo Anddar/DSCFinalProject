@@ -1,0 +1,303 @@
+{% extends "base.html"%} {% block title %}Home{% endblock %} {% block content %}
+
+<br/>
+<h1 style="text-align: center" ><font size="150px" color="#ffffff"><u>Matrix Computation</u></font></h1>
+<br/>
+
+<body>
+	<div class="content-section">
+		<fieldset class="form-group">
+			<form action="" method="POST">
+				<h4><u>Matrix Inputs:</u><input type="number" id="n" min="1" max="100" name="n" placeholder="n" style="float: right;"><p style="float: right; margin-bottom: 0em; margin-top: .4em;" >x</p><input type="number" id="m" min="1" max="100" name="m" placeholder="m" style="float: right;"><button type="Send" class="btn btn-primary" name="rand" value="randB" style="float: right;">Randomize B</button><button type="Send" class="btn btn-primary" name="rand" value="randA" style="float: right; margin-right: .5em;">Randomize A</button></h4>
+
+				<!-- This is matrix A's info -->
+				<div class="form-group">
+				{% if last_inputA|length > 1 %}
+					<label for="amatrix">A = <textarea id="amatrix" name="amatrix">{{ last_inputA }}</textarea></label>	
+				{% else %}
+					<label for="amatrix">A = <textarea id="amatrix" name="amatrix" placeholder="1 2 3
+4 5 6
+7 8 9"></textarea></label>	
+				{% endif %}
+				</div>
+
+				<!-- Buttons to perform factorizations and other matrix computing things -->
+				<br/>
+				<div class="form-group">
+					<button type="Send" class="btn btn-primary" name="multiply" value="multiplyAB">A x B</button>
+					<button type="Send" class="btn btn-primary" name="subtract" value="A-B">A - B</button>
+					<button type="Send" class="btn btn-primary" name="addition" value="A+B">A + B</button>
+					<button type="Send" class="btn btn-primary" name="lu" value="luA">LU(A)</button>
+					<button type="Send" class="btn btn-primary" name="lu" value="luB">LU(B)</button>
+					<button type="Send" class="btn btn-primary" name="qr" value="qrA">QR(A)</button>
+					<button type="Send" class="btn btn-primary" name="qr" value="qrB">QR(B)</button>
+					<button type="Send" class="btn btn-primary" name="svd" value="svdA">SVD(A)</button>
+					<button type="Send" class="btn btn-primary" name="svd" value="svdB">SVD(B)</button>
+					<button type="Send" class="btn btn-primary" name="eigVal" value="eigValA">EigVal(A)</button>
+					<button type="Send" class="btn btn-primary" name="eigVal" value="eigValB">EigVal(B)</button>
+					<button type="Send" class="btn btn-primary" name="inv" value="invA">Inverse(A)</button>
+					<button type="Send" class="btn btn-primary" name="inv" value="invB">Inverse(B)</button>
+					<button type="Send" class="btn btn-primary" name="trans" value="transA">Transpose(A)</button>
+					<button type="Send" class="btn btn-primary" name="trans" value="transB">Transpose(B)</button>
+					<button type="Send" class="btn btn-primary" name="rank" value="rankA">Rank(A)</button>
+					<button type="Send" class="btn btn-primary" name="rank" value="rankB">Rank(B)</button>
+				</div>
+				
+				<!-- This is matrix B's info -->
+				<br/>
+				<div class="form-group">
+					{% if last_inputB|length > 1 %}
+						<label for="bmatrix">B = <textarea id="bmatrix" name="bmatrix">{{ last_inputB }}</textarea></label>
+					{% else %}
+						<label for="bmatrix">B = <textarea id="bmatrix" name="bmatrix" placeholder="1 2
+3 4
+5 6"></textarea></label>
+					{% endif %}
+					
+					<br/>
+				</div>
+
+				<p>#Note: When entering exponents use value**2 or value^2 notation so the value is to the power of 2. When wanting sqrt use (value)**(1/2) and you can use parentheses around exponents and values.</p>
+		
+				<h4><u>Data Input:</u><button type="Send" class="btn btn-primary" name="dataIn" value="dataIn" style="float: right; margin-right: .5em;">Send Data</button></h4><p>Here we can take in data points (x, y) and find the best fit line for the data using linear algebra.</p>
+
+				{% if last_inputD|length > 1 %}
+					<label for="data">Data = <textarea id="data" name="data">{{ last_inputD }}</textarea></label>
+				{% else %}
+					<label for="data">Data = <textarea id="data" name="data" placeholder="x y
+1 4
+2 7"></textarea></label>
+				{% endif %}
+				
+				<script type="text/javascript">
+					// We grab the textarea by its id and add a event listener to call
+					// the function auto resize which will set the height of the textarea
+					// to the scroll height of the box.
+					textarea = document.querySelector("#amatrix");
+					textarea2 = document.querySelector("#bmatrix");
+					textarea3 = document.querySelector("#data");
+					textarea.addEventListener('input', autoResize, false);
+					textarea2.addEventListener('input', autoResize, false);
+					textarea3.addEventListener('input', autoResize, false);
+					
+					// This function will set the height of the textarea to the
+					// scroll height
+					function autoResize() {
+							this.style.height = 'auto';
+							this.style.height = this.scrollHeight + 'px';
+					}
+				</script>
+			</form>
+		</fieldset>
+	</div>
+	
+	<div class="content-section">
+		<fieldset class="form-group">
+			<h4><u>Output:</u></h4>
+			<br/>
+				<!-- The output or answer to the type of factorization goes here. -->
+			{% if output_type == "multiply" %}
+
+				<h7>The output matrix of A * B is:</h7>
+				<br/>
+
+				<label for="axb">A x B = <table id="axb">
+					{% for i in output %}
+
+						<tr>
+						{% for j in i %}
+	
+							<td>{{j}}</td>
+				
+						{% endfor %}
+						</tr>
+							
+					{% endfor %}
+				</table></label>
+
+			{% elif output_type == "subtract" %}
+			
+				<h7>The output matrix of A - B is:</h7>
+				<br/>
+
+				<label for="a-b">A - B = <table id="a-b">
+					{% for i in output %}
+
+						<tr>
+						{% for j in i %}
+	
+							<td>{{j}}</td>
+				
+						{% endfor %}
+						</tr>
+							
+					{% endfor %}
+				</table></label>
+			
+			{% elif output_type == "add" %}
+
+				<h7>The output matrix of A + B is:</h7>
+				<br/>
+
+				<label for="a+b">A + B =<table id="a+b">
+					{% for i in output %}
+
+						<tr>
+						{% for j in i %}
+	
+							<td>{{j}}</td>
+				
+						{% endfor %}
+						</tr>
+							
+					{% endfor %}
+				</table></label>
+
+			{% elif output_type == "lu" %}
+
+				<h7>The LU Factorization of Matrix {{matrix}} is:</h7>
+				<br/>
+
+				{% set vars = {'num':0, 'name':["P", "L", "U"]} %}
+			
+				{% for o in output %}
+
+					<label for="lu" >{{vars.name[vars.num]}} = <table id="lu">
+						{% for i in o %}
+	
+							<tr>
+							{% for j in i %}
+		
+								<td>{{"%.6f"|format(j)}}</td>
+					
+							{% endfor %}
+							</tr>
+								
+						{% endfor %}
+					</table></label>
+
+					{% if vars.update({'num': vars.num + 1, 'name':["P", "L", "U"]}) %} {% endif %}
+					
+					
+					<br/>
+				{% endfor %}
+
+			{% elif output_type == "qr" %}
+
+				<h7>The QR Factorization of Matrix {{matrix}} is:</h7>
+				<br/>
+
+				{% set vars = {'num':0, 'name':["Q", "R"]} %}
+			
+				{% for o in output %}
+
+					<label for="qr" >{{vars.name[vars.num]}} = <table id="qr">
+						{% for i in o %}
+	
+							<tr>
+							{% for j in i %}
+		
+								<td>{{j}}</td>
+					
+							{% endfor %}
+							</tr>
+								
+						{% endfor %}
+					</table></label>
+
+					{% if vars.update({'num': vars.num + 1, 'name':["Q", "R"]}) %} {% endif %}
+					
+					
+					<br/>
+				{% endfor %}
+
+			{% elif output_type == "svd" %}
+
+				<h7>The SVD Factorization of Matrix {{matrix}} is:</h7>
+				<br/>
+
+				{% set vars = {'num':0, 'name':["S", "V", "D"]} %}
+			
+				{% for o in output %}
+
+					<label for="svd" >{{vars.name[vars.num]}} = <table id="svd">
+						{% for i in o %}
+	
+							<tr>
+							{% for j in i %}
+		
+								<td>{{"%.6f"|format(j)}}</td>
+					
+							{% endfor %}
+							</tr>
+								
+						{% endfor %}
+					</table></label>
+
+					{% if vars.update({'num': vars.num + 1, 'name':["S", "V", "D"]}) %} {% endif %}
+					
+					
+					<br/>
+				{% endfor %}
+			
+			{% elif output_type == "eigvals" %}
+			
+				<h7>The eigenvalues of Matrix {{matrix}} are: {% for i in range(0, output|length) %} {% if i < output|length - 1 %} &lambda; = {{output[i]}} &emsp;<u><b>or</b></u>&emsp; {% else %} &lambda; = {{output[i]}} {% endif %} {% endfor %}</h7>
+			
+			{% elif output_type == "inverse" %}
+
+				<h7>The inverse of Matrix {{matrix}} is:</h7>
+				<br/>
+
+				<label for="inv">{{matrix}}<sup>-1</sup> = <table id="inv">
+					{% for i in output %}
+
+						<tr>
+						{% for j in i %}
+	
+							<td>{{j}}</td>
+				
+						{% endfor %}
+						</tr>
+							
+					{% endfor %}
+				</table></label>
+			
+			{% elif output_type == "transpose" %}
+
+				<h7>The transpose of Matrix {{matrix}} is:</h7>
+				<br/>
+
+				<label for="trans">{{matrix}}<sup>T</sup> = <table id="trans">
+					{% for i in output %}
+
+						<tr>
+						{% for j in i %}
+	
+							<td>{{j}}</td>
+				
+						{% endfor %}
+						</tr>
+							
+					{% endfor %}
+				</table></label>
+			
+			{% elif output_type == "rank" %}
+
+				<h7>The rank of Matrix {{matrix}} is: Rank({{matrix}}) = {{output}}</h7>
+
+			{% elif output_type == "dataOut" %}
+
+				<h7>The graph of the data and best fit line can be seen below, Slope: {{output[0]}} Y-Intercept: {{output[1]}}</h7>
+				<br/>
+				
+				<img class="dataplots" src={{output[2]}} alt="Error creating plot.">
+					
+
+			{% endif %}
+			
+		</fieldset>
+		<script src="static/output.js"></script>
+	</div>
+</body>
+{% endblock %}
