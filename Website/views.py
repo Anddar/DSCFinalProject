@@ -16,7 +16,6 @@ plots = []
 
 views = Blueprint('views', __name__)
 
-
 # This functions purpose is to setup the main page or home
 # route of the website
 @views.route('/', methods=["GET", "POST"])
@@ -25,9 +24,8 @@ def home():
     if request.method == "POST":
 
         #Remove old plot files if necessary
-        for plot in plots:
-            os.remove(plot)
-            plots.pop(0)
+        for file in os.listdir("./Website/static/dataGraphs"):
+            os.remove("./Website/static/dataGraphs/" + str(file))
 
         # Pulling the matrix information from the post request
         A = request.form.get("amatrix")
@@ -42,138 +40,22 @@ def home():
             if r != "amatrix" and r != "bmatrix" and r != "m" and r != "n" and r != "data":
                 operation = request.form.get(r)
 
+				# To randomize our matrices
         if operation == "randA":
-            A = ""
             m = request.form.get('m')
             n = request.form.get('n')
+            r = randomize_matrix(m, n, 'A', B, D)
 
-            try:
-                m = int(m)
-                n = int(n)
-
-            except ValueError:
-                flash(
-                    "Improper m or n value given. Please enter two integer values between 1-100.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            if (m < 1 or m > 100) or (n < 1 or n > 100):
-                flash(
-                    "The m or n value given to randomize the matrix was out of the range 1-100, please keep the size of the matrix between 1-100.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            if not m or not n:
-                flash(
-                    "Random matrix A cannot be created if m and n are not given as we do not know the size of random matrix wanted.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            numbers = [i for i in range(-99, 0)]
-            numbers.extend([i for i in range(1, 100)])
-
-            for i in range(1, m + 1):
-
-                for j in range(1, n + 1):
-
-                    if j == n and i < m:
-                        A += str(choice(numbers)) + "\r\n"
-                    else:
-                        A += str(choice(numbers)) + " "
-
-            flash(f"Randomized matrix A of size: {m}x{n}", "success")
-            return render_template("home.html",
-                                   last_inputA=str(A),
-                                   last_inputB=str(B),
-                                   last_inputD=str(D),
-                                   matrix="",
-                                   output_type="",
-                                   output="")
+            return r
 
         elif operation == "randB":
-            B = ""
             m = request.form.get('m')
             n = request.form.get('n')
+            r = randomize_matrix(m, n, 'B', A, D)
 
-            try:
-                m = int(m)
-                n = int(n)
-
-            except ValueError:
-                flash(
-                    "Improper m or n value given. Please enter two integer values between 1-100.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            if (m < 1 or m > 100) or (n < 1 or n > 100):
-                flash(
-                    "The m or n value given to randomize the matrix was out of the range 1-100, please keep the size of the matrix between 1-100.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            if not m or not n:
-                flash(
-                    "Random matrix B cannot be created if m and n are not given as we do not know the size of random matrix wanted.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-
-            numbers = [i for i in range(-99, 0)]
-            numbers.extend([i for i in range(1, 100)])
-
-            for i in range(1, m + 1):
-
-                for j in range(1, n + 1):
-
-                    if j == n and i < m:
-                        B += str(choice(numbers)) + "\r\n"
-                    else:
-                        B += str(choice(numbers)) + " "
-
-            flash(f"Randomized matrix B of size: {m}x{n}", "success")
-            return render_template("home.html",
-                                   last_inputA=str(A),
-                                   last_inputB=str(B),
-                                   last_inputD=str(D),
-                                   matrix="",
-                                   output_type="",
-                                   output="")
-
+            return r
+					
+				# Making sure that there was something given by the user
         if not A and not B and not D:
             flash(
                 "Nothing entered for matrix A or B or data D. Cannot continue computation.",
@@ -232,7 +114,7 @@ def home():
                 matrixB = np.matrix(matrixB)
             except:
                 flash(
-                    "Check that input for matrix A follows input criteria, spaces between each entry and press enter/return to start on a new row of the matrix. Also exponents are used by doing ** Ex: 2**2 = 4",
+                    "Check that input for matrix B follows input criteria, spaces between each entry and press enter/return to start on a new row of the matrix. Also exponents are used by doing ** Ex: 2**2 = 4",
                     "error")
                 return render_template("home.html",
                                        last_inputA=str(A),
@@ -280,643 +162,166 @@ def home():
 
         # Handling the operation the user requested from the website
         if operation == "multiplyAB":
-            if not A or not B:
-                flash(
-                    "Cannot do matrix product when there was no input for either A or B.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrices(A, B)
+            if r: return r
 
             result = multiply_matrix(matrixA, matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed A * B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       output_type="multiply",
-                                       output=result)
+            r = create_result(result, A, B, D, "", "multiply", "Successfully computed A * B, scroll down to see output.")
+            return r
 
         elif operation == "A-B":
-            if not A or not B:
-                flash(
-                    "Cannot do matrix subtraction when there was no input for either A or B.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrices(A, B)
+            if r: return r
 
             result = matrix_subtraction(matrixA, matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed A - B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       output_type="subtract",
-                                       output=result)
+            r = create_result(result, A, B, D, "", "subtract", "Successfully computed A - B, scroll down to see output.")
+            return r
 
         elif operation == "A+B":
-            if not A or not B:
-                flash(
-                    "Cannot do matrix addition when there was no input for either A or B.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrices(A, B)
+            if r: return r
 
             result = matrix_addition(matrixA, matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed A + B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       output_type="add",
-                                       output=result)
+            r = create_result(result, A, B, D, "", "add", "Successfully computed A + B, scroll down to see output.")
+            return r
 
         elif operation == "luA":
-            if not A:
-                flash(
-                    "Cannot find the LU factorization of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r					
 
             result = lu_factor(matrixA)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed LU factorization of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="lu",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "lu", "Successfully computed LU factorization of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "luB":
-            if not B:
-                flash(
-                    "Cannot find the LU factorization of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = lu_factor(matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed LU factorization of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="lu",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "lu", "Successfully computed LU factorization of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "qrA":
-            if not A:
-                flash(
-                    "Cannot find the QR factorization of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = qr_factor(matrixA)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed QR factorization of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="qr",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "qr", "Successfully computed QR factorization of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "qrB":
-            if not B:
-                flash(
-                    "Cannot find the QR factorization of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = qr_factor(matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed QR factorization of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="qr",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "qr", "Successfully computed QR factorization of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "svdA":
-            if not A:
-                flash(
-                    "Cannot find the SVD factorization of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = svd_factor(matrixA)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed SVD factorization of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="svd",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "svd", "Successfully computed SVD factorization of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "svdB":
-            if not B:
-                flash(
-                    "Cannot find the SVD factorization of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = svd_factor(matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed SVD factorization of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="svd",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "svd", "Successfully computed SVD factorization of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "eigValA":
-            if not A:
-                flash(
-                    "Cannot find eigen values of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = eig_value(matrixA)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed eigenvalues of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="eigvals",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "eigvals", "Successfully computed eigenvalues of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "eigValB":
-            if not B:
-                flash(
-                    "Cannot find eigen values of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = eig_value(matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed eigenvalues of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="eigvals",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "eigvals", "Successfully computed eigenvalues of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "invA":
-            if not A:
-                flash(
-                    "Cannot find the inverse of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = inverse(matrixA)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the inverse of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="inverse",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "inverse", "Successfully computed the inverse of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "invB":
-            if not B:
-                flash(
-                    "Cannot find the inverse of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = inverse(matrixB)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the inverse of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="inverse",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "inverse", "Successfully computed the inverse of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "transA":
-            if not A:
-                flash(
-                    "Cannot find the transpose of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = transpose(matrixA)
 
-            if result == "False":
-                flash(
-                    "Something went wrong while finding the transpose of matrix A, check your matrix A input and try again.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the transpose of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="transpose",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "transpose", "Successfully computed the transpose of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "transB":
-            if not B:
-                flash(
-                    "Cannot find the transpose of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = transpose(matrixB)
 
-            if result == "False":
-                flash(
-                    "Something went wrong while finding the transpose of matrix B, check your matrix B input and try again.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the transpose of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="transpose",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "transpose", "Successfully computed the transpose of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "rankA":
-            if not A:
-                flash(
-                    "Cannot find the rank of matrix A if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(A, "A")
+            if r: return r	
 
             result = rank(matrixA)
 
-            if result == "False":
-                flash(
-                    "Something went wrong while finding the rank of matrix A, check your matrix A input and try again.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the rank of matrix A, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="A",
-                                       output_type="rank",
-                                       output=result)
+            r = create_result(result, A, B, D, "A", "rank", "Successfully computed the rank of matrix A, scroll down to see output.")
+            return r
 
         elif operation == "rankB":
-            if not B:
-                flash(
-                    "Cannot find the rank of matrix B if nothing is given for the matrix.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(B, "B")
+            if r: return r	
 
             result = rank(matrixB)
 
-            if result == "False":
-                flash(
-                    "Something went wrong while finding the rank of matrix B, check your matrix B input and try again.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully computed the rank of matrix B, scroll down to see output.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="B",
-                                       output_type="rank",
-                                       output=result)
+            r = create_result(result, A, B, D, "B", "rank", "Successfully computed the rank of matrix B, scroll down to see output.")
+            return r
 
         elif operation == "dataIn":
-            if not D:
-                flash(
-                    "Cannot find the best fit line of matrixD/Data Input if nothing is given for the data.",
-                    "error")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
+            r = check_matrix(D, "D")
+            if r: return r
 
             result = create_bestfit(matrixD, vecB, xData, yData)
 
-            if result == "False":
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="",
-                                       output_type="",
-                                       output="")
-            else:
-                flash(
-                    "Successfully found the line of best fit for the given data, scroll down to see the outputed graph.",
-                    "success")
-                return render_template("home.html",
-                                       last_inputA=str(A),
-                                       last_inputB=str(B),
-                                       last_inputD=str(D),
-                                       matrix="D",
-                                       output_type="dataOut",
-                                       output=result)
+            r = create_result(result, A, B, D, "D", "dataOut", "Successfully found the line of best fit for the given data, scroll down to see the outputed graph.")
+            return r
 
         return render_template("home.html",
                                last_inputA=str(A),
@@ -1332,6 +737,139 @@ def create_bestfit(matrix, b, xData, yData):
             "error")
         return "False"
 
+
+# This functions purpose is to randomize a matrix of size that was given by the user.
+def randomize_matrix(m, n, matrix, altMatrix, D):
+		randMatrix = ""
+
+		try:
+				m = int(m)
+				n = int(n)
+
+		except ValueError:
+				flash(
+						"Improper m or n value given. Please enter two integer values between 1-100.",
+						"error")
+				return render_template("home.html",
+															 last_inputA="",
+															 last_inputB="",
+															 last_inputD="",
+															 matrix="",
+															 output_type="",
+															 output="")
+
+		if (m < 1 or m > 100) or (n < 1 or n > 100):
+				flash(
+						"The m or n value given to randomize the matrix was out of the range 1-100, please keep the size of the matrix between 1-100.",
+						"error")
+				return render_template("home.html",
+															 last_inputA="",
+															 last_inputB="",
+															 last_inputD="",
+															 matrix="",
+															 output_type="",
+															 output="")
+
+		if not m or not n:
+				flash(
+						f"Random matrix {matrix} cannot be created if m and n are not given as we do not know the size of random matrix wanted.",
+						"error")
+				return render_template("home.html",
+															 last_inputA="",
+															 last_inputB="",
+															 last_inputD="",
+															 matrix="",
+															 output_type="",
+															 output="")
+
+		numbers = [i for i in range(-99, 101)]
+
+		for i in range(1, m + 1):
+
+				for j in range(1, n + 1):
+
+						if j == n and i < m:
+								randMatrix += str(choice(numbers)) + "\r\n"
+						else:
+								randMatrix += str(choice(numbers)) + " "
+
+		flash(f"Randomized matrix {matrix} of size: {m}x{n}", "success")
+
+		if matrix == 'A':
+				return render_template("home.html",
+															 last_inputA=str(randMatrix),
+															 last_inputB=str(altMatrix),
+															 last_inputD=str(D),
+															 matrix="",
+															 output_type="",
+															 output="")
+		else:
+				return render_template("home.html",
+															 last_inputA=str(altMatrix),
+															 last_inputB=str(randMatrix),
+															 last_inputD=str(D),
+															 matrix="",
+															 output_type="",
+															 output="")
+
+
+# This functions purpose is to check if the matrices given are real or not.
+def check_matrices(A, B):
+
+		if not A or not B:
+				flash(
+				"Cannot do matrix addition when there was no input for either A or B.",
+				"error")
+				return render_template("home.html",
+															last_inputA=str(A),
+															last_inputB=str(B),
+															last_inputD=str(D),
+															matrix="",
+															output_type="",
+															output="")
+
+		return None
+
+
+# This functions purpose is to check if a matrix is valid 
+def check_matrix(A, matrix):
+
+		if not A:
+				flash(
+				f"Cannot do operation when there was no input for matrix {matrix}.",
+				"error")
+				return render_template("home.html",
+															last_inputA=str(A),
+															last_inputB=str(B),
+															last_inputD=str(D),
+															matrix="",
+															output_type="",
+															output="")
+
+		return None
+	
+	
+# This functions purpose is to create the return result and whether we are going to return the information back to the website to be displayed.
+def create_result(result, A, B, D, matrixType, outputType, flashMSG):
+
+		if result == "False":
+				flash(f"There was an error when trying to compute {outputType} of matrix {matrixType}.", "error")
+				return render_template("home.html",
+															 last_inputA=str(A),
+															 last_inputB=str(B),
+															 last_inputD=str(D),
+															 matrix="",
+															 output_type="",
+															 output="")
+		else:
+				flash(flashMSG, "success")
+				return render_template("home.html",
+															 last_inputA=str(A),
+															 last_inputB=str(B),
+															 last_inputD=str(D),
+															 matrix=matrixType,
+															 output_type=outputType,
+															 output=result)
 
 @views.route('/keeprunning')
 def keep_running():
