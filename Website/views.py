@@ -162,7 +162,7 @@ def home():
 
         # Handling the operation the user requested from the website
         if operation == "multiplyAB":
-            r = check_matrices(A, B)
+            r = check_matrices(A, B, D)
             if r: return r
 
             result = multiply_matrix(matrixA, matrixB)
@@ -171,7 +171,7 @@ def home():
             return r
 
         elif operation == "A-B":
-            r = check_matrices(A, B)
+            r = check_matrices(A, B, D)
             if r: return r
 
             result = matrix_subtraction(matrixA, matrixB)
@@ -180,7 +180,7 @@ def home():
             return r
 
         elif operation == "A+B":
-            r = check_matrices(A, B)
+            r = check_matrices(A, B, D)
             if r: return r
 
             result = matrix_addition(matrixA, matrixB)
@@ -189,7 +189,7 @@ def home():
             return r
 
         elif operation == "luA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r					
 
             result = lu_factor(matrixA)
@@ -198,7 +198,7 @@ def home():
             return r
 
         elif operation == "luB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = lu_factor(matrixB)
@@ -207,7 +207,7 @@ def home():
             return r
 
         elif operation == "qrA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = qr_factor(matrixA)
@@ -216,7 +216,7 @@ def home():
             return r
 
         elif operation == "qrB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = qr_factor(matrixB)
@@ -225,7 +225,7 @@ def home():
             return r
 
         elif operation == "svdA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = svd_factor(matrixA)
@@ -234,7 +234,7 @@ def home():
             return r
 
         elif operation == "svdB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = svd_factor(matrixB)
@@ -243,7 +243,7 @@ def home():
             return r
 
         elif operation == "eigValA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = eig_value(matrixA)
@@ -252,7 +252,7 @@ def home():
             return r
 
         elif operation == "eigValB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = eig_value(matrixB)
@@ -261,7 +261,7 @@ def home():
             return r
 
         elif operation == "invA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = inverse(matrixA)
@@ -270,7 +270,7 @@ def home():
             return r
 
         elif operation == "invB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = inverse(matrixB)
@@ -279,7 +279,7 @@ def home():
             return r
 
         elif operation == "transA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = transpose(matrixA)
@@ -288,7 +288,7 @@ def home():
             return r
 
         elif operation == "transB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = transpose(matrixB)
@@ -297,7 +297,7 @@ def home():
             return r
 
         elif operation == "rankA":
-            r = check_matrix(A, "A")
+            r = check_matrix(A, B, D, "A")
             if r: return r	
 
             result = rank(matrixA)
@@ -306,7 +306,7 @@ def home():
             return r
 
         elif operation == "rankB":
-            r = check_matrix(B, "B")
+            r = check_matrix(B, A, D, "B")
             if r: return r	
 
             result = rank(matrixB)
@@ -315,7 +315,7 @@ def home():
             return r
 
         elif operation == "dataIn":
-            r = check_matrix(D, "D")
+            r = check_matrix(D, A, B, "D")
             if r: return r
 
             result = create_bestfit(matrixD, vecB, xData, yData)
@@ -814,7 +814,7 @@ def randomize_matrix(m, n, matrix, altMatrix, D):
 
 
 # This functions purpose is to check if the matrices given are real or not.
-def check_matrices(A, B):
+def check_matrices(A, B, D):
 
 		if not A or not B:
 				flash(
@@ -832,16 +832,34 @@ def check_matrices(A, B):
 
 
 # This functions purpose is to check if a matrix is valid 
-def check_matrix(A, matrix):
+def check_matrix(A, alt1, alt2, matrix):
 
 		if not A:
 				flash(
 				f"Cannot do operation when there was no input for matrix {matrix}.",
 				"error")
-				return render_template("home.html",
+				if matrix == "A":
+						return render_template("home.html",
 															last_inputA=str(A),
-															last_inputB=str(B),
-															last_inputD=str(D),
+															last_inputB=str(alt1),
+															last_inputD=str(alt2),
+															matrix="",
+															output_type="",
+															output="")
+				elif matrix == "B":
+						return render_template("home.html",
+															last_inputA=str(alt1),
+															last_inputB=str(A),
+															last_inputD=str(alt2),
+															matrix="",
+															output_type="",
+															output="")
+
+				else:
+						return render_template("home.html",
+															last_inputA=str(alt1),
+															last_inputB=str(alt2),
+															last_inputD=str(A),
 															matrix="",
 															output_type="",
 															output="")
